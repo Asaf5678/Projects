@@ -1,4 +1,6 @@
--- Fuel Imports and Exports by Country
+-- Fuel Imports and Exports by country data exploration
+-- Skills used: Joins, CTE's, Windows Functions, Aggregate Functions, Creating Views, Converting Data Types
+
 
 SELECT * FROM dbo.Countries
 WHERE Region is NOT NULL
@@ -106,7 +108,7 @@ ORDER BY 2,3 DESC -- for highest fuel exports
 --ORDER BY 2,4 DESC -- for highest fuel imports
 
 
--- Find the top 3 regions with the hieghest fuel exports precentage
+-- Find the top 3 regions with the highest fuel exports precentage
 
 
 Select *
@@ -121,7 +123,7 @@ Select *
 Where rnk < 4
 
 
----- Creating Viewד to store data for later visualizations
+---- Creating Views to store data for later visualizations
 
 CREATE VIEW Just_countries AS 
 SELECT * 
