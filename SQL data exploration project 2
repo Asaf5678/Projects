@@ -1,6 +1,7 @@
 ---- Credit card Transactions data exploration 
+---- Skills used: Joins, Windows Functions, Creating Views, Time functions, Variables, loops
 
--- Showing the data we are going to use
+-- Showing the data I am going to use
 
 SELECT * FROM dbo.Transactions
 SELECT * FROM dbo.Categories
