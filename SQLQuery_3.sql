@@ -1,0 +1,119 @@
+---- Credit card Transactions data exploration 
+
+-- Showing the data we are going to use
+
+SELECT * FROM dbo.Transactions
+SELECT * FROM dbo.Categories
+
+
+-- Creating a date table for the transactions data
+
+DROP TABLE Date_table
+
+CREATE TABLE Date_table (
+    date DATE,
+    day INT,
+    month VARCHAR(10),
+    year INT
+);
+
+
+DECLARE @start_date DATE = (SELECT MIN(dbo.Transactions.[Date]) FROM dbo.Transactions)
+DECLARE @end_date DATE = (SELECT MAX(dbo.Transactions.Date) FROM dbo.Transactions)
+DECLARE @current_date DATE = @start_date
+
+WHILE @current_date <= @end_date
+BEGIN
+    INSERT INTO date_table (date, day, month, year)
+    VALUES (
+        @current_date,
+        DATENAME(DAY, @current_date),
+        DATENAME(MONTH, @current_date),
+        DATEPART(YEAR, @current_date)
+    );
+    SET @current_date = DATEADD(DAY, 1, @current_date);
+END;
+
+SELECT * FROM Date_table
+ 
+
+-- Creating views for just the income and the expenses
+
+CREATE VIEW Expenses AS
+SELECT * 
+FROM dbo.Transactions 
+WHERE Type = 'debit' AND Description NOT IN ('transfer', 'Credit card Payment') 
+
+
+CREATE VIEW Income AS
+SELECT * 
+FROM dbo.Transactions 
+WHERE Type = 'credit' AND Description NOT IN ('transfer', 'Credit card Payment') 
+
+
+-- Expenses by amount
+
+SELECT Date, Description, Amount
+FROM Expenses
+ORDER BY 3 DESC
+
+
+-- Expenses and Income By Category
+
+SELECT SUM(exp.Amount) AS Total_expenses_in_each_category, cat.Category
+FROM Expenses exp
+JOIN Categories cat
+ON exp.CategoryID = cat.CategoryID
+GROUP BY cat.Category
+ORDER BY 1 DESC
+
+SELECT SUM(inc.Amount) AS Total_expenses_in_each_category, cat.Category
+FROM Income inc
+JOIN Categories cat
+ON inc.CategoryID = cat.CategoryID
+GROUP BY cat.Category
+ORDER BY 1 DESC
+
+
+-- Showing the Transactions amount accumulate over the time
+
+SELECT dat.date , SUM(inc.Amount) OVER(ORDER BY dat.date) AS Income_DTD, SUM(exp.Amount) OVER(ORDER BY dat.date) AS Expenses_DTD
+FROM dbo.Date_table dat
+LEFT JOIN dbo.Expenses exp
+ON dat.date = exp.Date
+LEFT JOIN dbo.Income inc
+ON dat.date = inc.Date
+ORDER BY 1
+
+
+-- Showing the Transactions amount accumulate over the years(YTD)
+
+SELECT dat.date , SUM(inc.Amount) OVER(PARTITION BY dat.year ORDER BY dat.date) AS Income_YTD, SUM(exp.Amount) OVER(PARTITION BY dat.year ORDER BY dat.date) AS Expenses_YTD
+FROM dbo.Date_table dat
+LEFT JOIN dbo.Expenses exp
+ON dat.date = exp.Date
+LEFT JOIN dbo.Income inc
+ON dat.date = inc.Date
+ORDER BY 1
+
+
+-- Net income(Income - Expenses) 
+
+SELECT SUM(inc.Amount) - SUM(exp.Amount) AS Net_income
+FROM dbo.Date_table dat
+LEFT JOIN dbo.Expenses exp
+ON dat.date = exp.Date
+LEFT JOIN dbo.Income inc
+ON dat.date = inc.Date
+
+
+-- Net income by date
+
+SELECT dat.date, SUM(inc.Amount - exp.Amount) OVER(ORDER BY dat.date)
+FROM dbo.Date_table dat
+LEFT JOIN dbo.Expenses exp
+ON dat.date = exp.Date
+LEFT JOIN dbo.Income inc
+ON dat.date = inc.Date
+ORDER BY 1
+
