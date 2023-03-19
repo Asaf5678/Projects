@@ -1,6 +1,9 @@
 
----- Cleaning Data in SQL Queries
+/*
+Cleaning Data in SQL Queries
 
+In this project I'll be cleaning a dataset of housing in Nashville, Tennessee.
+*/
 
 
 SELECT *
